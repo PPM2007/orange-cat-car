@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#a8e2ff">
+<title>橙子开车啦</title>
+<style>
+  :root{ --sky1:#a8e2ff; --sky2:#cdefff; --sky3:#e8f9ff; --road-h:clamp(120px,17vh,210px); }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden;}
+  body{
+    font-family:"Comic Sans MS","Chalkboard SE","YouYuan","Yuanti SC",cursive,sans-serif;
+    background:linear-gradient(var(--sky1) 0%,var(--sky2) 55%,var(--sky3) 100%);
+  }
+  .scene{position:fixed;inset:0;overflow:hidden;}
+  .sky{position:absolute;inset:0;background:linear-gradient(var(--sky1) 0%,var(--sky2) 55%,var(--sky3) 100%);}
+
+  /* 太阳 + 光芒 */
+  .sun-rays{position:absolute;top:calc(10% - 30px);left:calc(11% - 30px);width:134px;height:134px;border-radius:50%;
+    background:repeating-conic-gradient(rgba(255,210,90,.5) 0deg 8deg,rgba(255,210,90,0) 8deg 22deg);
+    -webkit-mask:radial-gradient(circle,transparent 36%,#000 38%);
+    mask:radial-gradient(circle,transparent 36%,#000 38%);
+    animation:spin 24s linear infinite;}
+  .sun{position:absolute;top:10%;left:11%;width:74px;height:74px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#fff4b8,#ffd54d 60%,#ffc107);
+    box-shadow:0 0 44px 14px rgba(255,213,77,.42);}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* 云 */
+  .cloud{position:absolute;background:#fff;border-radius:60px;opacity:.92;}
+  .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%;}
+  .cloud1{width:120px;height:44px;top:13%;left:-150px;animation:drift 40s linear infinite;}
+  .cloud1::before{width:52px;height:52px;left:22px;top:-24px;}
+  .cloud1::after{width:64px;height:64px;left:56px;top:-30px;}
+  .cloud2{width:150px;height:50px;top:27%;left:-190px;animation:drift 55s linear infinite;animation-delay:-22s;opacity:.8;}
+  .cloud2::before{width:60px;height:60px;left:26px;top:-28px;}
+  .cloud2::after{width:76px;height:76px;left:72px;top:-34px;}
+  .cloud3{width:96px;height:36px;top:8%;left:-130px;animation:drift 34s linear infinite;animation-delay:-9s;opacity:.7;}
+  .cloud3::before{width:42px;height:42px;left:18px;top:-20px;}
+  .cloud3::after{width:52px;height:52px;left:48px;top:-26px;}
+  @keyframes drift{to{transform:translateX(calc(100vw + 360px));}}
+
+  /* 飞鸟 */
+  .bird{position:absolute;z-index:2;animation:fly linear infinite;}
+  .bird1{top:18%;left:-70px;animation-duration:30s;}
+  .bird2{top:29%;left:-90px;animation-duration:40s;animation-delay:-14s;}
+  .bird svg{display:block;width:42px;height:auto;}
+  @keyframes fly{to{transform:translateX(calc(100vw + 160px));}}
+
+  /* 远山 */
+  .hills{position:absolute;left:0;right:0;bottom:var(--road-h);height:42%;pointer-events:none;}
+  .hill{position:absolute;bottom:0;border-radius:50% 50% 0 0 / 46% 46% 0 0;}
+  .hill1{left:-6%;width:70%;height:100%;background:linear-gradient(#b4df9b,#8fcf7c);}
+  .hill2{right:-8%;width:56%;height:84%;background:linear-gradient(#c4e8ac,#a1d78c);}
+  .hill3{left:32%;width:44%;height:70%;background:linear-gradient(#a8db8f,#88c978);}
+
+  /* 草地 */
+  .grass{position:absolute;left:0;right:0;top:56%;bottom:var(--road-h);
+    background:linear-gradient(#93d67d 0%,#6fc164 58%,#58ad55 100%);}
+
+  /* 路边植物（滚动） */
+  .plants{position:absolute;left:0;right:0;bottom:calc(var(--road-h) - 6px);height:132px;overflow:hidden;}
+  .plants-inner{display:flex;align-items:flex-end;height:100%;width:max-content;animation:scroll 11s linear infinite;}
+  .plants-set{display:flex;align-items:flex-end;gap:58px;padding:0 30px;}
+  .plant{width:88px;height:120px;display:block;flex:none;}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* 马路 */
+  .road{position:absolute;left:0;right:0;bottom:0;height:var(--road-h);background:linear-gradient(#59616b,#474e57);}
+  .road::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:#e8edf2;border-radius:3px;}
+  .road::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:#e8edf2;border-radius:3px;}
+  .road-line{position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;
+    background:repeating-linear-gradient(90deg,#ffd166 0 56px,transparent 56px 112px);
+    animation:roadmove .7s linear infinite;}
+  @keyframes roadmove{from{background-position:0 0}to{background-position:-112px 0}}
+
+  /* 小车（落地 + 放大） */
+  .shadow{position:absolute;left:50%;bottom:calc(var(--road-h) - 10px);width:min(430px,62vw);height:22px;transform:translateX(-50%);
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.32),transparent 70%);z-index:4;}
+  .car{position:absolute;left:50%;bottom:var(--road-h);transform:translateX(-50%);z-index:5;}
+  .car-inner{animation:bob 2.6s ease-in-out infinite;}
+  .car-svg{width:min(660px,92vw,calc((100vh - 160px) * 1.9));height:auto;display:block;
+    filter:drop-shadow(0 10px 14px rgba(0,0,0,.22));}
+  .car-svg .wheel{transform-box:fill-box;transform-origin:center;animation:spin .9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+  /* 标题与时钟 */
+  .caption{position:fixed;top:18px;left:18px;z-index:10;font-size:17px;font-weight:700;color:#476b50;
+    background:rgba(255,255,255,.78);padding:8px 14px;border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.08);}
+  .time-badge{position:fixed;top:18px;right:18px;z-index:10;background:rgba(255,255,255,.88);
+    border-radius:16px;padding:10px 16px;text-align:right;box-shadow:0 8px 20px rgba(52,86,115,.18);}
+  .time-badge .time{font-size:24px;font-weight:800;color:#355d7e;letter-spacing:.02em;font-variant-numeric:tabular-nums;}
+  .time-badge .date{font-size:12px;color:#7b97a8;margin-top:2px;}
+
+  @media(max-width:560px){
+    .sun{width:58px;height:58px;}
+    .sun-rays{top:calc(10% - 23px);left:calc(11% - 23px);width:104px;height:104px;}
+    .caption{font-size:15px;top:12px;left:12px;padding:7px 11px;}
+    .time-badge{top:12px;right:12px;padding:8px 13px;}
+    .time-badge .time{font-size:20px;}
+    .time-badge .date{font-size:11px;}
+    .bird svg{width:34px;}
+  }
+  @media(max-width:380px){ .time-badge .date{display:none;} }
+  @media(prefers-reduced-motion:reduce){.sun-rays,.cloud,.bird,.plants-inner,.road-line,.car-svg .wheel,.car-inner{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="scene">
+    <div class="sky"></div>
+    <div class="sun-rays"></div>
+    <div class="sun"></div>
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+
+    <div class="bird bird1"><svg viewBox="0 0 52 20" aria-hidden="true"><path d="M6 15 Q16 4 26 15 Q36 4 46 15" fill="none" stroke="#4d7080" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="bird bird2"><svg viewBox="0 0 52 20" aria-hidden="true"><path d="M6 15 Q16 4 26 15 Q36 4 46 15" fill="none" stroke="#4d7080" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="hills"><div class="hill hill1"></div><div class="hill hill2"></div><div class="hill hill3"></div></div>
+    <div class="grass"></div>
+
+    <div class="plants">
+      <div class="plants-inner">
+        <div class="plants-set">
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#tree"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#bush"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#flower"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#tall-grass"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#mushroom"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#stone"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#bush"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#tree"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#flower"/></svg>
+        </div>
+        <div class="plants-set">
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#tree"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#bush"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#flower"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#tall-grass"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#mushroom"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#stone"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#bush"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#tree"/></svg>
+          <svg class="plant" viewBox="0 0 80 120" aria-hidden="true"><use href="#flower"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="road"><div class="road-line"></div></div>
+    <div class="shadow"></div>
+
+    <div class="car">
+      <div class="car-inner">
+        <svg class="car-svg" viewBox="0 0 380 200" role="img" aria-label="一只叫橙子的橙色小猫，开着一辆蓝色小汽车">
+          <!-- 车轮 -->
+          <g class="wheel">
+            <circle cx="110" cy="174" r="26" fill="#3a3f46" stroke="#252a30" stroke-width="3"/>
+            <circle cx="110" cy="174" r="14" fill="#eef3f7"/>
+            <circle cx="110" cy="174" r="5.5" fill="#5db5f2"/>
+            <g stroke="#8aa4b8" stroke-width="4" stroke-linecap="round">
+              <line x1="110" y1="159" x2="110" y2="189"/>
+              <line x1="95" y1="174" x2="125" y2="174"/>
+              <line x1="99.4" y1="163.4" x2="120.6" y2="184.6"/>
+              <line x1="99.4" y1="184.6" x2="120.6" y2="163.4"/>
+            </g>
+          </g>
+          <g class="wheel">
+            <circle cx="270" cy="174" r="26" fill="#3a3f46" stroke="#252a30" stroke-width="3"/>
+            <circle cx="270" cy="174" r="14" fill="#eef3f7"/>
+            <circle cx="270" cy="174" r="5.5" fill="#5db5f2"/>
+            <g stroke="#8aa4b8" stroke-width="4" stroke-linecap="round">
+              <line x1="270" y1="159" x2="270" y2="189"/>
+              <line x1="255" y1="174" x2="285" y2="174"/>
+              <line x1="259.4" y1="163.4" x2="280.6" y2="184.6"/>
+              <line x1="259.4" y1="184.6" x2="280.6" y2="163.4"/>
+            </g>
+          </g>
+
+          <!-- 车身 -->
+          <rect x="40" y="117" width="300" height="62" rx="18" fill="#5db5f2" stroke="#3585bd" stroke-width="4"/>
+          <rect x="90" y="81" width="170" height="52" rx="16" fill="#5db5f2" stroke="#3585bd" stroke-width="4"/>
+          <!-- 车窗 -->
+          <rect x="102" y="91" width="80" height="32" rx="9" fill="#dff4ff" stroke="#3585bd" stroke-width="3"/>
+          <rect x="190" y="91" width="56" height="32" rx="9" fill="#dff4ff" stroke="#3585bd" stroke-width="3"/>
+
+          <!-- 门缝、把手、后视镜 -->
+          <line x1="186" y1="121" x2="186" y2="168" stroke="#3585bd" stroke-width="3" opacity=".5"/>
+          <rect x="118" y="130" width="14" height="5" rx="2.5" fill="#3585bd"/>
+          <rect x="198" y="130" width="14" height="5" rx="2.5" fill="#3585bd"/>
+          <line x1="252" y1="95" x2="264" y2="89" stroke="#3585bd" stroke-width="3"/>
+          <circle cx="266" cy="87" r="5" fill="#5db5f2" stroke="#3585bd" stroke-width="2"/>
+
+          <!-- 橙子小猫（精细卡通） -->
+          <g transform="translate(218 107)">
+            <path d="M-13 -10 L-16 -20 L-5 -14 Z" fill="#ffb347" stroke="#e8912d" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M5 -14 L16 -20 L13 -10 Z" fill="#ffb347" stroke="#e8912d" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M-11 -12 L-13 -17 L-7 -14 Z" fill="#f6b3a0"/>
+            <path d="M7 -14 L13 -17 L11 -12 Z" fill="#f6b3a0"/>
+            <circle cx="0" cy="0" r="17" fill="#ffb347" stroke="#e8912d" stroke-width="2.5"/>
+            <path d="M-5 -14 L-4 -8 M0 -15 L0 -8 M5 -14 L4 -8" stroke="#e8912d" stroke-width="2.2" stroke-linecap="round" opacity=".6" fill="none"/>
+            <path d="M-12 1 L-9 0 M-12 5 L-9 4" stroke="#e8912d" stroke-width="2" stroke-linecap="round" opacity=".5" fill="none"/>
+            <path d="M12 1 L9 0 M12 5 L9 4" stroke="#e8912d" stroke-width="2" stroke-linecap="round" opacity=".5" fill="none"/>
+            <circle cx="-6" cy="-3" r="3.4" fill="#2d2a26"/>
+            <circle cx="6" cy="-3" r="3.4" fill="#2d2a26"/>
+            <circle cx="-7" cy="-4" r="1.2" fill="#fff"/>
+            <circle cx="5" cy="-4" r="1.2" fill="#fff"/>
+            <path d="M-2.6 3 L2.6 3 L0 5.8 Z" fill="#e97a6b"/>
+            <path d="M-2.5 8 Q0 11.5 2.5 8" fill="none" stroke="#c46a4d" stroke-width="2" stroke-linecap="round"/>
+            <g stroke="#e8912d" stroke-width="1.8" stroke-linecap="round">
+              <path d="M-7 4 L-15 2.5"/>
+              <path d="M-7 5.5 L-16 5.5"/>
+              <path d="M-7 7 L-15 8.5"/>
+              <path d="M7 4 L15 2.5"/>
+              <path d="M7 5.5 L16 5.5"/>
+              <path d="M7 7 L15 8.5"/>
+            </g>
+            <circle cx="-10" cy="5" r="2.8" fill="#ff9d8a" opacity=".55"/>
+            <circle cx="10" cy="5" r="2.8" fill="#ff9d8a" opacity=".55"/>
+            <circle cx="34" cy="6" r="7" fill="none" stroke="#33373d" stroke-width="4"/>
+            <line x1="34" y1="13" x2="34" y2="19" stroke="#33373d" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="26" cy="6" r="5" fill="#ffb347" stroke="#e8912d" stroke-width="2"/>
+          </g>
+
+          <!-- 车灯与格栅 -->
+          <rect x="324" y="120" width="16" height="11" rx="5" fill="#ffe08a" stroke="#d9a81f" stroke-width="2.5"/>
+          <rect x="46" y="120" width="13" height="11" rx="5" fill="#ff8b7a" stroke="#d9574a" stroke-width="2.5"/>
+          <rect x="328" y="140" width="12" height="15" rx="3" fill="#4a9fd6" stroke="#3585bd" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="caption">🐱 橙子开车啦</div>
+  <div class="time-badge"><div class="time" id="time">--:--:--</div><div class="date" id="date"></div></div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <g id="tree">
+        <rect x="36" y="72" width="10" height="40" rx="4" fill="#8a5a34"/>
+        <circle cx="41" cy="52" r="24" fill="#3f9d58"/>
+        <circle cx="27" cy="62" r="16" fill="#46af62"/>
+        <circle cx="55" cy="62" r="16" fill="#46af62"/>
+        <circle cx="41" cy="38" r="16" fill="#55c170"/>
+      </g>
+      <g id="bush">
+        <circle cx="30" cy="84" r="20" fill="#4fb866"/>
+        <circle cx="52" cy="88" r="15" fill="#3fae59"/>
+        <circle cx="16" cy="90" r="13" fill="#5cc572"/>
+      </g>
+      <g id="flower">
+        <rect x="38" y="64" width="4" height="44" rx="2" fill="#4a9c55"/>
+        <circle cx="27" cy="62" r="9" fill="#ff8fb1"/>
+        <circle cx="53" cy="62" r="9" fill="#ff8fb1"/>
+        <circle cx="40" cy="51" r="10" fill="#ff5c8a"/>
+        <circle cx="40" cy="51" r="4" fill="#ffd166"/>
+      </g>
+      <g id="tall-grass">
+        <path d="M20 110 Q18 90 8 82" fill="none" stroke="#4a9c55" stroke-width="4" stroke-linecap="round"/>
+        <path d="M30 110 Q32 86 42 78" fill="none" stroke="#5cc572" stroke-width="4" stroke-linecap="round"/>
+        <path d="M25 110 Q24 92 22 84" fill="none" stroke="#3fae59" stroke-width="4" stroke-linecap="round"/>
+      </g>
+      <g id="mushroom">
+        <rect x="36" y="78" width="8" height="26" rx="3" fill="#f3ead9"/>
+        <path d="M25 78 Q40 56 55 78 Z" fill="#ff8a80"/>
+        <circle cx="34" cy="72" r="3" fill="#fff"/>
+        <circle cx="46" cy="70" r="3" fill="#fff"/>
+      </g>
+      <g id="stone">
+        <ellipse cx="40" cy="98" rx="20" ry="12" fill="#c9d3d8"/>
+        <ellipse cx="40" cy="96" rx="16" ry="9" fill="#dbe3e7"/>
+      </g>
+    </defs>
+  </svg>
+
+  <script>
+    const timeEl = document.getElementById('time');
+    const dateEl = document.getElementById('date');
+    const pad = n => String(n).padStart(2, '0');
+    function tick() {
+      const d = new Date();
+      timeEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      dateEl.textContent = new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(d);
+    }
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>
